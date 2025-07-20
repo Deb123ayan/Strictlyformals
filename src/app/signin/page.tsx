@@ -3,16 +3,27 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import pb from '../lib/pocketbase'; // Assuming you have a PocketBase client setup
+import pb from '../lib/pocketbase';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    phone: ''
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,31 +32,36 @@ export default function AuthForm() {
     
     try {
       if (isLogin) {
-        // Sign in with PocketBase
-        await pb.collection('users').authWithPassword(email, password);
-        console.log('Successfully signed in');
+        // Sign in
+        await pb.collection('users').authWithPassword(formData.email, formData.password);
         router.push('/dashboard');
       } else {
-        // Sign up with PocketBase
-        const data = {
-          email,
-          password,
-          passwordConfirm: password,
-          name,
+        // Validate phone number format
+        const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,3}[-\s.]?[0-9]{3,4}[-\s.]?[0-9]{3,4}$/;
+        if (!phoneRegex.test(formData.phone)) {
+          throw new Error('Please enter a valid phone number');
+        }
+
+        // Sign up with all user details
+        const userData = {
+          email: formData.email,
+          password: formData.password,
+          passwordConfirm: formData.password,
+          name: formData.name,
+          phone: formData.phone,
+          emailVisibility: true, // Set based on your requirements
         };
         
-        // Create user
-        await pb.collection('users').create(data);
+        // Create the user record
+        await pb.collection('users').create(userData);
         
-        // Optional: automatically login after signup
-        await pb.collection('users').authWithPassword(email, password);
-        
-        console.log('Successfully signed up');
+        // Automatically log in the user
+        await pb.collection('users').authWithPassword(formData.email, formData.password);
         router.push('/dashboard');
       }
     } catch (err: any) {
       console.error('Authentication error:', err);
-      setError('Can\'t authenticate');
+      setError(err.message || 'Authentication failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +70,6 @@ export default function AuthForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100 p-4">
       <div className="w-full max-w-md">
-        {/* Luxury Card Container */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,14 +103,10 @@ export default function AuthForm() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`mb-6 p-3 rounded-lg text-sm flex items-center ${error.includes('successfully') ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}
+                className="mb-6 p-3 rounded-lg text-sm flex items-center bg-rose-50 text-rose-700"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {error.includes('successfully') ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  )}
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {error}
               </motion.div>
@@ -112,35 +123,69 @@ export default function AuthForm() {
                   className="space-y-5"
                 >
                   {!isLogin && (
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-stone-600">Full Name</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="James Bond"
-                          className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-500 focus:border-stone-500 outline-none transition-all duration-200 bg-white/90"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required={!isLogin}
-                        />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
+                    <>
+                      <div className="space-y-1">
+                        <label htmlFor="name" className="text-sm font-medium text-stone-600">
+                          Full Name
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="name"
+                            name="name"
+                            type="text"
+                            placeholder="James Bond"
+                            className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-500 focus:border-stone-500 outline-none transition-all duration-200 bg-white/90"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            minLength={2}
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
-                    </div>
+
+                      <div className="space-y-1">
+                        <label htmlFor="phone" className="text-sm font-medium text-stone-600">
+                          Phone Number
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            placeholder="+1 (555) 123-4567"
+                            className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-500 focus:border-stone-500 outline-none transition-all duration-200 bg-white/90"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            required
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-stone-600">Email Address</label>
+                    <label htmlFor="email" className="text-sm font-medium text-stone-600">
+                      Email Address
+                    </label>
                     <div className="relative">
                       <input
+                        id="email"
+                        name="email"
                         type="email"
                         placeholder="client@strictlyformals.com"
                         className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-500 focus:border-stone-500 outline-none transition-all duration-200 bg-white/90"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -152,14 +197,18 @@ export default function AuthForm() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-stone-600">Password</label>
+                    <label htmlFor="password" className="text-sm font-medium text-stone-600">
+                      Password
+                    </label>
                     <div className="relative">
                       <input
+                        id="password"
+                        name="password"
                         type="password"
                         placeholder="••••••••"
                         className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-500 focus:border-stone-500 outline-none transition-all duration-200 bg-white/90"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={formData.password}
+                        onChange={handleChange}
                         required
                         minLength={8}
                       />
