@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -78,6 +79,7 @@ export default function Dashboard() {
   const [productSelections, setProductSelections] = useState<{
     [key: number]: { selectedColor?: string; selectedSize?: string };
   }>({});
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Fetch order history function with AbortController
   const fetchOrderHistory = async (signal?: AbortSignal) => {
@@ -105,7 +107,6 @@ export default function Dashboard() {
     
     try {
       await pb.collection('orders').delete(orderId);
-      // Refresh order history after cancellation
       const abortController = new AbortController();
       await fetchOrderHistory(abortController.signal);
       alert('Order cancelled successfully');
@@ -123,7 +124,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Set email from auth model
     setCheckoutInfo(prev => ({
       ...prev,
       email: pb.authStore.model.email || ''
@@ -132,7 +132,6 @@ export default function Dashboard() {
     const abortController = new AbortController();
     fetchOrderHistory(abortController.signal);
 
-    // Cleanup on unmount
     return () => {
       console.log('Cleaning up order history fetch');
       abortController.abort();
@@ -204,7 +203,7 @@ export default function Dashboard() {
 
   // Products data
   const products: Product[] = [
-    // Blazers (12 total)
+    // Blazers
     { id: 1, name: 'Classic Navy Blazer', category: 'blazers', price: 12999, image: 'https://handcmediastorage.blob.core.windows.net/productimages/CO/COPRA154-G01-126836-800px-1040px.jpg', rating: 4.8, reviews: 156, brand: 'Strictly Formals', colors: ['Navy', 'Black'], sizes: ['S', 'M', 'L', 'XL'] },
     { id: 2, name: 'Charcoal Grey Blazer', category: 'blazers', price: 14299, image: 'https://tse2.mm.bing.net/th/id/OIP.i_x8Ih204w-dgqHR7baUpwHaO0?rs=1&pid=ImgDetMain&o=7&rm=3', rating: 4.7, reviews: 98, brand: 'Executive', colors: ['Charcoal', 'Black'], sizes: ['S', 'M', 'L'] },
     { id: 3, name: 'Midnight Black Blazer', category: 'blazers', price: 15599, image: '/blazer-black.jpg', rating: 4.9, reviews: 203, brand: 'Premium', colors: ['Black'], sizes: ['M', 'L', 'XL'] },
@@ -215,10 +214,9 @@ export default function Dashboard() {
     { id: 37, name: 'Tweed Heritage Blazer', category: 'blazers', price: 17499, image: '/blazer-tweed.jpg', rating: 4.7, reviews: 68, brand: 'Classic', colors: ['Brown', 'Green'], sizes: ['M', 'L', 'XL'] },
     { id: 38, name: 'Slim Fit Stretch Blazer', category: 'blazers', price: 14999, image: '/blazer-slim.jpg', rating: 4.6, reviews: 143, brand: 'Flex', colors: ['Navy', 'Charcoal'], sizes: ['S', 'M', 'L'] },
     { id: 39, name: 'White Dinner Jacket', category: 'blazers', price: 15999, image: '/blazer-white.jpg', rating: 4.8, reviews: 54, brand: 'Formal', colors: ['White'], sizes: ['M', 'L', 'XL'] },
-    { id: 40, name: 'Shawl Collar Blazer', category: 'blazers', price: 16499, image: '/blazer-shawl.jpg', rating: 4.9, reviews: 87, brand: 'Elegance', colors: ['Black', ' Burgundy'], sizes: ['L', 'XL', 'XXL'] },
+    { id: 40, name: 'Shawl Collar Blazer', category: 'blazers', price: 16499, image: '/blazer-shawl.jpg', rating: 4.9, reviews: 87, brand: 'Elegance', colors: ['Black', 'Burgundy'], sizes: ['L', 'XL', 'XXL'] },
     { id: 41, name: 'Travel Wrinkle-Free Blazer', category: 'blazers', price: 13499, image: '/blazer-travel.jpg', rating: 4.5, reviews: 126, brand: 'Commuter', colors: ['Navy', 'Gray'], sizes: ['S', 'M', 'L', 'XL'] },
-  
-    // Trousers (12 total)
+    // Trousers
     { id: 4, name: 'Tailored Dress Trousers', category: 'trousers', price: 6499, image: '/trousers-tailored.jpg', rating: 4.6, reviews: 87, brand: 'Strictly Formals', colors: ['Black', 'Gray'], sizes: ['30', '32', '34', '36'] },
     { id: 5, name: 'Slim Fit Formal Pants', category: 'trousers', price: 5599, image: '/trousers-slim.jpg', rating: 4.5, reviews: 124, brand: 'Modern Cut', colors: ['Black', 'Charcoal'], sizes: ['28', '30', '32', '34'] },
     { id: 6, name: 'Classic Pleated Trousers', category: 'trousers', price: 7299, image: '/trousers-pleated.jpg', rating: 4.7, reviews: 76, brand: 'Traditional', colors: ['Gray', 'Brown'], sizes: ['32', '34', '36'] },
@@ -231,8 +229,7 @@ export default function Dashboard() {
     { id: 48, name: 'Wide-Leg Dress Pants', category: 'trousers', price: 7599, image: '/trousers-wide.jpg', rating: 4.5, reviews: 65, brand: 'Modern', colors: ['Black', 'Charcoal'], sizes: ['32', '34', '36'] },
     { id: 49, name: 'Pin-Striped Trousers', category: 'trousers', price: 8199, image: '/trousers-pinstripe.jpg', rating: 4.8, reviews: 93, brand: 'Executive', colors: ['Navy', 'Gray'], sizes: ['30', '32', '34'] },
     { id: 50, name: 'Linen Summer Trousers', category: 'trousers', price: 6999, image: '/trousers-linen.jpg', rating: 4.4, reviews: 107, brand: 'Tropical', colors: ['Beige', 'White'], sizes: ['30', '32', '34'] },
-  
-    // Watches (12 total)
+    // Watches
     { id: 7, name: 'Executive Gold Watch', category: 'watches', price: 25999, image: '/watch-gold.jpg', rating: 4.9, reviews: 234, brand: 'Timepiece Co.', colors: ['Gold', 'Rose Gold'] },
     { id: 8, name: 'Silver Chronograph', category: 'watches', price: 19499, image: '/watch-silver.jpg', rating: 4.8, reviews: 187, brand: 'Precision', colors: ['Silver', 'Black'] },
     { id: 9, name: 'Classic Leather Watch', category: 'watches', price: 12999, image: '/watch-leather.jpg', rating: 4.6, reviews: 156, brand: 'Heritage', colors: ['Brown', 'Black'] },
@@ -245,8 +242,7 @@ export default function Dashboard() {
     { id: 57, name: 'GMT World Timer Watch', category: 'watches', price: 31999, image: '/watch-gmt.jpg', rating: 4.7, reviews: 64, brand: 'Traveler', colors: ['Black', 'Blue'] },
     { id: 58, name: 'Vintage Pocket Watch', category: 'watches', price: 15999, image: '/watch-pocket.jpg', rating: 4.6, reviews: 89, brand: 'Antique', colors: ['Silver', 'Gold'] },
     { id: 59, name: 'Carbon Fiber Sports Watch', category: 'watches', price: 23999, image: '/watch-carbon.jpg', rating: 4.5, reviews: 118, brand: 'Sport', colors: ['Black', 'Gray'] },
-  
-    // Ties (12 total)
+    // Ties
     { id: 10, name: 'Silk Paisley Tie', category: 'ties', price: 3899, image: '/tie-paisley.jpg', rating: 4.4, reviews: 67, brand: 'Strictly Formals', colors: ['Navy', 'Burgundy', 'Emerald'] },
     { id: 11, name: 'Classic Striped Tie', category: 'ties', price: 3499, image: '/tie-striped.jpg', rating: 4.5, reviews: 94, brand: 'Gentleman\'s', colors: ['Navy', 'Red', 'Silver'] },
     { id: 12, name: 'Luxury Bow Tie', category: 'ties', price: 5199, image: '/bowtie.jpg', rating: 4.7, reviews: 43, brand: 'Formal Wear', colors: ['Black', 'White', 'Burgundy'] },
@@ -259,8 +255,7 @@ export default function Dashboard() {
     { id: 66, name: 'Skinny Micro-Pattern Tie', category: 'ties', price: 3999, image: '/tie-skinny.jpg', rating: 4.4, reviews: 76, brand: 'Contemporary', colors: ['Black', 'Gray', 'Blue'] },
     { id: 67, name: 'Reversible Tie', category: 'ties', price: 4499, image: '/tie-reversible.jpg', rating: 4.3, reviews: 92, brand: 'Versatile', colors: ['Navy/Red', 'Black/Silver', 'Brown/Green'] },
     { id: 68, name: 'Hand-Painted Silk Tie', category: 'ties', price: 6499, image: '/tie-painted.jpg', rating: 4.7, reviews: 58, brand: 'Artisan', colors: ['Multicolor'] },
-  
-    // Shoes (12 total)
+    // Shoes
     { id: 13, name: 'Oxford Leather Shoes', category: 'shoes', price: 10799, image: '/shoes-oxford.jpg', rating: 4.8, reviews: 178, brand: 'Strictly Formals', colors: ['Black', 'Brown'], sizes: ['7', '8', '9', '10', '11'] },
     { id: 14, name: 'Derby Dress Shoes', category: 'shoes', price: 9499, image: '/shoes-derby.jpg', rating: 4.6, reviews: 145, brand: 'Classic', colors: ['Black', 'Tan'], sizes: ['8', '9', '10', '11'] },
     { id: 15, name: 'Monk Strap Shoes', category: 'shoes', price: 11999, image: '/shoes-monk.jpg', rating: 4.9, reviews: 92, brand: 'Premium', colors: ['Brown', 'Black'], sizes: ['7', '8', '9', '10'] },
@@ -301,7 +296,6 @@ export default function Dashboard() {
   // Cart functions
   const addToCart = (product: Product) => {
     const selections = productSelections[product.id] || {};
-    // Check if required selections are made
     if (product.colors && !selections.selectedColor) {
       alert('Please select a color before adding to cart');
       return;
@@ -335,6 +329,10 @@ export default function Dashboard() {
         }];
       }
     });
+
+    if (selectedProduct) {
+      setSelectedProduct(null); // Close modal after adding to cart
+    }
   };
 
   const removeFromCart = (productId: number, color?: string, size?: string) => {
@@ -382,12 +380,12 @@ export default function Dashboard() {
     for (let i = 5; i <= 10; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]); // Format as YYYY-MM-DD
+      dates.push(date.toISOString().split('T')[0]);
     }
     return dates;
   };
 
-  // Set default delivery date to 5 days from today
+  // Set default delivery date
   useEffect(() => {
     const defaultDate = getDeliveryDates()[0];
     setCheckoutInfo(prev => ({
@@ -398,23 +396,18 @@ export default function Dashboard() {
 
   // Checkout function
   const handleCheckout = async () => {
-    // Validate email format
     if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(checkoutInfo.email)) {
       alert('Please enter a valid email address');
       return;
     }
-
-    // Validate phone number (10-15 digits)
     if (!/^\d{10,15}$/.test(checkoutInfo.phone)) {
       alert('Please enter a valid phone number (10-15 digits)');
       return;
     }
-
     if (!checkoutInfo.deliveryAddress.trim()) {
       alert('Please enter a delivery address');
       return;
     }
-
     if (!checkoutInfo.deliveryDate) {
       alert('Please select a delivery date');
       return;
@@ -440,21 +433,17 @@ export default function Dashboard() {
         status: 'pending'
       };
 
-      // Save order to PocketBase
       await pb.collection('orders').create(orderData, { 
         $autoCancel: false,
         $cancelKey: 'orderCreation'
       });
       
-      // Clear cart after successful order
       setCartItems([]);
       setShowCart(false);
       
-      // Refresh order history
       const abortController = new AbortController();
       await fetchOrderHistory(abortController.signal);
       
-      // Show success message
       alert('Order placed successfully!');
     } catch (err) {
       console.error('Error placing order:', err);
@@ -464,11 +453,33 @@ export default function Dashboard() {
     }
   };
 
+  // Buy now function
+  const handleBuyNow = (product: Product) => {
+    const selections = productSelections[product.id] || {};
+    if (product.colors && !selections.selectedColor) {
+      alert('Please select a color before proceeding');
+      return;
+    }
+    if (product.sizes && !selections.selectedSize) {
+      alert('Please select a size before proceeding');
+      return;
+    }
+
+    setCartItems([{
+      ...product,
+      quantity: 1,
+      selectedColor: selections.selectedColor,
+      selectedSize: selections.selectedSize
+    }]);
+    setSelectedProduct(null);
+    setShowCart(true);
+  };
+
   // Calculate cart totals
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Helper function to format price
+  // Format price
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -506,7 +517,7 @@ export default function Dashboard() {
     );
   };
 
-  // Reset all filters
+  // Reset filters
   const resetFilters = () => {
     setSelectedCategory('all');
     setSearchTerm('');
@@ -516,13 +527,19 @@ export default function Dashboard() {
     setSortBy('name');
   };
 
+  // Handle sign out
+  const handleSignOut = () => {
+    pb.authStore.clear();
+    setShowMobileMenu(false);
+    router.push('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 relative">
       {/* Header */}
       <header className="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Mobile Menu Button */}
             <div className="lg:hidden flex items-center">
               <button 
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -531,8 +548,6 @@ export default function Dashboard() {
                 <Menu className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Logo - Centered on mobile */}
             <div className="flex-1 lg:flex-none flex justify-center lg:justify-start">
               <div className="flex items-center">
                 <div className="p-2 bg-gradient-to-br from-stone-900 to-stone-700 rounded-lg shadow-md">
@@ -552,8 +567,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Search Bar - Hidden on mobile */}
             <div className="hidden lg:block flex-1 max-w-xl mx-8">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
@@ -566,13 +579,11 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-
-            {/* Right Actions */}
             <div className="flex items-center space-x-4 md:space-x-6">
-              <button className="relative p-2 text-stone-600 hover:text-stone-900 transition-colors hidden md:block"   onClick={() => router.push('/notification')}>
+              <button className="relative p-2 text-stone-600 hover:text-stone-900 transition-colors hidden md:block" onClick={() => router.push('/notification')}>
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-               </button>
+              </button>
               <button 
                 className="p-2 text-stone-600 hover:text-stone-900 transition-colors hidden md:block"
                 onClick={() => router.push('/profile')}
@@ -602,8 +613,6 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-
-          {/* Mobile Search - Only visible on mobile */}
           <div className="lg:hidden pb-3 px-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
@@ -646,7 +655,6 @@ export default function Dashboard() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-
               <div className="space-y-4">
                 <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left bg-stone-100">
                   <User className="w-5 h-5 text-stone-600" />
@@ -674,11 +682,16 @@ export default function Dashboard() {
                   <Heart className="w-5 h-5 text-stone-600" />
                   <span className="text-sm font-medium">Wishlist</span>
                 </button>
-              </div>
-
-              <div className="mt-auto pt-6 border-t border-stone-200">
-                <button className="w-full px-4 py-2.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition-colors text-sm font-medium">
-                  Sign Out
+                <button 
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left hover:bg-stone-100"
+                  onClick={handleSignOut}
+                >
+                  <svg className="w-5 h-5 text-stone-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M16 17l5-5-5-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 12H9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="text-sm font-medium">Sign Out</span>
                 </button>
               </div>
             </motion.div>
@@ -688,10 +701,9 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar - Always visible */}
+          {/* Sidebar */}
           <div className="w-full lg:w-72">
             <div className="space-y-6">
-              {/* Categories */}
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Categories</h3>
                 <div className="space-y-2">
@@ -713,8 +725,6 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-
-              {/* Price Range */}
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Price Range</h3>
                 <div className="mb-4">
@@ -744,8 +754,6 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* Colors */}
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Colors</h3>
                 <div className="grid grid-cols-3 gap-3">
@@ -764,8 +772,6 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-
-              {/* Sizes */}
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Sizes</h3>
                 <div className="grid grid-cols-3 gap-3">
@@ -784,8 +790,6 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-
-              {/* Sort By */}
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Sort By</h3>
                 <select
@@ -805,7 +809,6 @@ export default function Dashboard() {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Results Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-serif font-bold text-stone-900">
@@ -824,8 +827,6 @@ export default function Dashboard() {
                 </button>
               )}
             </div>
-
-            {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               <AnimatePresence>
                 {filteredProducts.map((product) => (
@@ -836,9 +837,9 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group"
+                    className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
+                    onClick={() => setSelectedProduct(product)}
                   >
-                    {/* Product Image */}
                     <div className="relative h-56 md:h-64 bg-stone-100 flex items-center justify-center overflow-hidden">
                       <img 
                         src={product.image} 
@@ -846,7 +847,10 @@ export default function Dashboard() {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <button
-                        onClick={() => toggleLike(product.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(product.id);
+                        }}
                         className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110"
                       >
                         <Heart
@@ -862,14 +866,11 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-
-                    {/* Product Info */}
                     <div className="p-6">
                       <div className="mb-3">
                         <h3 className="font-semibold text-stone-900 text-lg line-clamp-2">{product.name}</h3>
                         <p className="text-sm text-stone-600 font-medium">{product.brand}</p>
                       </div>
-
                       <div className="flex items-center space-x-2 mb-4">
                         <div className="flex items-center">
                           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -877,8 +878,6 @@ export default function Dashboard() {
                         </div>
                         <span className="text-sm text-stone-400">({product.reviews} reviews)</span>
                       </div>
-
-                      {/* Color and Size Selectors */}
                       <div className="mb-4 space-y-2">
                         {product.colors && product.colors.length > 0 && (
                           <div>
@@ -887,7 +886,10 @@ export default function Dashboard() {
                               {product.colors.map(color => (
                                 <button
                                   key={color}
-                                  onClick={() => selectColor(product.id, color)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    selectColor(product.id, color);
+                                  }}
                                   className={`w-6 h-6 rounded-full border-2 shadow-sm transition-all ${
                                     productSelections[product.id]?.selectedColor === color
                                       ? 'border-stone-900 scale-110'
@@ -900,7 +902,6 @@ export default function Dashboard() {
                             </div>
                           </div>
                         )}
-                        
                         {product.sizes && product.sizes.length > 0 && (
                           <div>
                             <p className="text-xs text-stone-500 mb-1">Sizes</p>
@@ -908,7 +909,10 @@ export default function Dashboard() {
                               {product.sizes.map(size => (
                                 <button
                                   key={size}
-                                  onClick={() => selectSize(product.id, size)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    selectSize(product.id, size);
+                                  }}
                                   className={`text-xs px-2 py-1 border rounded transition-all ${
                                     productSelections[product.id]?.selectedSize === size
                                       ? 'bg-stone-900 text-white border-stone-900'
@@ -922,7 +926,6 @@ export default function Dashboard() {
                           </div>
                         )}
                       </div>
-
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="text-lg md:text-xl font-bold text-stone-900">{formatPrice(product.price)}</span>
@@ -933,7 +936,10 @@ export default function Dashboard() {
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => addToCart(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product);
+                          }}
                           className="px-4 py-2.5 md:px-5 md:py-2.5 bg-gradient-to-r from-stone-900 to-stone-700 text-white rounded-lg hover:from-stone-800 hover:to-stone-600 transition-all shadow-md text-sm font-medium"
                         >
                           Add to Cart
@@ -944,7 +950,6 @@ export default function Dashboard() {
                 ))}
               </AnimatePresence>
             </div>
-
             {filteredProducts.length === 0 && (
               <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-stone-200">
                 <div className="text-6xl mb-4 text-stone-300">🔍</div>
@@ -961,6 +966,141 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Product Details Modal */}
+      <AnimatePresence>
+        {selectedProduct && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={() => setSelectedProduct(null)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'tween', ease: 'easeInOut' }}
+              className="fixed inset-x-0 bottom-0 md:top-10 md:bottom-auto max-w-4xl mx-auto bg-white rounded-t-2xl md:rounded-2xl shadow-2xl z-50 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 md:p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl md:text-2xl font-serif font-bold text-stone-900">{selectedProduct.name}</h2>
+                  <button 
+                    onClick={() => setSelectedProduct(null)}
+                    className="p-2 rounded-full hover:bg-stone-100 transition-colors"
+                  >
+                    <X className="w-6 h-6 text-stone-600" />
+                  </button>
+                </div>
+                <div className="md:flex gap-8">
+                  <div className="md:w-1/2 mb-6 md:mb-0">
+                    <div className="relative h-64 md:h-96 bg-stone-100 rounded-lg overflow-hidden">
+                      <img 
+                        src={selectedProduct.image} 
+                        alt={selectedProduct.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={() => toggleLike(selectedProduct.id)}
+                        className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110"
+                      >
+                        <Heart
+                          className={`w-6 h-6 transition-colors ${
+                            likedItems.has(selectedProduct.id) ? 'fill-red-500 text-red-500' : 'text-stone-400 hover:text-red-500'
+                          }`}
+                        />
+                      </button>
+                      {selectedProduct.rating >= 4.5 && (
+                        <div className="absolute top-4 left-4 bg-amber-500 text-white text-sm font-bold px-3 py-1 rounded flex items-center">
+                          <Star className="w-4 h-4 fill-white mr-1" />
+                          Premium
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="md:w-1/2">
+                    <p className="text-lg font-medium text-stone-600 mb-2">{selectedProduct.brand}</p>
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="flex items-center">
+                        <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                        <span className="text-base text-stone-600 ml-1 font-medium">{selectedProduct.rating}</span>
+                      </div>
+                      <span className="text-base text-stone-400">({selectedProduct.reviews} reviews)</span>
+                    </div>
+                    <div className="mb-6">
+                      <span className="text-2xl md:text-3xl font-bold text-stone-900">{formatPrice(selectedProduct.price)}</span>
+                      {selectedProduct.price > 10000 && (
+                        <p className="text-sm text-green-600 mt-1">Free Shipping</p>
+                      )}
+                    </div>
+                    {selectedProduct.colors && selectedProduct.colors.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-sm text-stone-600 mb-2">Colors</p>
+                        <div className="flex space-x-3">
+                          {selectedProduct.colors.map(color => (
+                            <button
+                              key={color}
+                              onClick={() => selectColor(selectedProduct.id, color)}
+                              className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all ${
+                                productSelections[selectedProduct.id]?.selectedColor === color
+                                  ? 'border-stone-900 scale-110'
+                                  : 'border-stone-200'
+                              }`}
+                              style={{ backgroundColor: color.toLowerCase() }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {selectedProduct.sizes && selectedProduct.sizes.length > 0 && (
+                      <div className="mb-6">
+                        <p className="text-sm text-stone-600 mb-2">Sizes</p>
+                        <div className="flex flex-wrap gap-3">
+                          {selectedProduct.sizes.map(size => (
+                            <button
+                              key={size}
+                              onClick={() => selectSize(selectedProduct.id, size)}
+                              className={`text-sm px-3 py-1.5 border rounded transition-all ${
+                                productSelections[selectedProduct.id]?.selectedSize === size
+                                  ? 'bg-stone-900 text-white border-stone-900'
+                                  : 'border-stone-200 hover:bg-stone-100'
+                              }`}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex gap-4">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => addToCart(selectedProduct)}
+                        className="flex-1 py-3 bg-gradient-to-r from-stone-900 to-stone-700 text-white rounded-lg hover:from-stone-800 hover:to-stone-600 transition-all shadow-md font-medium"
+                      >
+                        Add to Cart
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleBuyNow(selectedProduct)}
+                        className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-md font-medium"
+                      >
+                        Buy Now
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Cart Drawer */}
       <AnimatePresence>
@@ -989,7 +1129,6 @@ export default function Dashboard() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-
               <div className="flex-1 overflow-y-auto p-6">
                 {cartItems.length === 0 ? (
                   <div className="text-center py-12">
@@ -1026,14 +1165,12 @@ export default function Dashboard() {
                               </button>
                             </div>
                             <p className="text-sm text-stone-600 mb-1">{item.brand}</p>
-                            
                             {item.selectedColor && (
                               <p className="text-xs text-stone-500">Color: {item.selectedColor}</p>
                             )}
                             {item.selectedSize && (
                               <p className="text-xs text-stone-500">Size: {item.selectedSize}</p>
                             )}
-                            
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex items-center border border-stone-200 rounded-lg overflow-hidden">
                                 <button 
@@ -1058,11 +1195,8 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
-
-                    {/* Checkout Form */}
                     <div className="mt-8 space-y-4">
                       <h3 className="font-medium text-stone-900">Checkout Information</h3>
-                      
                       <div>
                         <label className="block text-sm text-stone-600 mb-1">Email *</label>
                         <input
@@ -1077,7 +1211,6 @@ export default function Dashboard() {
                           <p className="text-xs text-red-500 mt-1">Please enter a valid email address</p>
                         )}
                       </div>
-                      
                       <div>
                         <label className="block text-sm text-stone-600 mb-1">Phone Number *</label>
                         <input
@@ -1085,7 +1218,6 @@ export default function Dashboard() {
                           className="w-full px-4 py-2 border border-stone-200 rounded-lg text-sm"
                           value={checkoutInfo.phone}
                           onChange={(e) => {
-                            // Only allow numbers
                             const value = e.target.value.replace(/\D/g, '');
                             setCheckoutInfo({...checkoutInfo, phone: value});
                           }}
@@ -1098,7 +1230,6 @@ export default function Dashboard() {
                           <p className="text-xs text-red-500 mt-1">Please enter a valid phone number (10-15 digits)</p>
                         )}
                       </div>
-                      
                       <div>
                         <label className="block text-sm text-stone-600 mb-1">Delivery Address *</label>
                         <textarea
@@ -1108,7 +1239,6 @@ export default function Dashboard() {
                           required
                         />
                       </div>
-
                       <div>
                         <label className="block text-sm text-stone-600 mb-1">Preferred Delivery Date *</label>
                         <select
@@ -1134,7 +1264,7 @@ export default function Dashboard() {
                   </>
                 )}
               </div>
-
+            
               {cartItems.length > 0 && (
                 <div className="p-6 border-t border-stone-200 bg-stone-50">
                   <div className="flex justify-between mb-3 text-base">
