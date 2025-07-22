@@ -531,7 +531,7 @@ export default function Dashboard() {
   const handleSignOut = () => {
     pb.authStore.clear();
     setShowMobileMenu(false);
-    router.push('/login');
+    router.push('/signin');
   };
 
   return (
@@ -611,6 +611,17 @@ export default function Dashboard() {
                   </span>
                 )}
               </button>
+              <button 
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left hover:bg-stone-100"
+                  onClick={handleSignOut}
+                >
+                  <svg className="w-5 h-5 text-stone-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M16 17l5-5-5-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 12H9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="text-sm font-medium">Sign Out</span>
+                </button>
             </div>
           </div>
           <div className="lg:hidden pb-3 px-2">
@@ -678,21 +689,8 @@ export default function Dashboard() {
                   </svg>
                   <span className="text-sm font-medium">Order History</span>
                 </button>
-                <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left hover:bg-stone-100">
-                  <Heart className="w-5 h-5 text-stone-600" />
-                  <span className="text-sm font-medium">Wishlist</span>
-                </button>
-                <button 
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left hover:bg-stone-100"
-                  onClick={handleSignOut}
-                >
-                  <svg className="w-5 h-5 text-stone-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16 17l5-5-5-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M21 12H9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="text-sm font-medium">Sign Out</span>
-                </button>
+               
+                
               </div>
             </motion.div>
           </>
@@ -818,14 +816,7 @@ export default function Dashboard() {
                   Showing {filteredProducts.length} of {products.length} products
                 </p>
               </div>
-              {isMobile && (
-                <button
-                  onClick={resetFilters}
-                  className="px-4 py-2.5 bg-stone-100 border border-stone-200 rounded-lg hover:bg-stone-200 transition-colors text-sm font-medium"
-                >
-                  Reset
-                </button>
-              )}
+             
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               <AnimatePresence>
